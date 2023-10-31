@@ -1,6 +1,8 @@
 ﻿using ExcelMapper;
-using System.Linq;
-using System.Text.Encodings;
+using System.Text.Json;
+using System.Text.Encodings.Web;
+using System.Text;
+using System.Text.Unicode;
 
 namespace asp_net_console
 {
@@ -8,6 +10,8 @@ namespace asp_net_console
     {
         static void Main(string[] args)
         {
+            
+            string path = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
             var tanks = GetTanks();
             var units = GetUnits();
             var factories = GetFactories();
@@ -26,10 +30,26 @@ namespace asp_net_console
                 Console.WriteLine($"{item.Name} принадлежит установке {FindUnit(units, tanks, item.Name!).Name} и заводу {FindFactory(factories, foundUnit).Name}");
             }
 
-            Console.WriteLine("------------------------------------------------------------------------------------------------");
-            /*Console.Write();*/
-            Console.ReadLine();
+            //запись в json файлы (сериализация)
+            CreateJson(tanks);
+            CreateJson(units);
+            CreateJson(factories);
 
+            //чтение из json файла (десериализация)
+            string jsonStr = File.ReadAllText(path + "/Data/asp_net_console.Tank[].json");
+            Tank[]? tanks1 = JsonSerializer.Deserialize<Tank[]>(jsonStr);
+
+            Console.WriteLine("------------------------------------------------------------------------------------------------");
+
+            //поиск
+            string? request;
+            do
+            {
+                Console.Write("Поиск резервуаров: ");
+                request = Console.ReadLine();
+                Console.WriteLine(SearchTank(request!));
+
+            } while (request != "");
         }
 
         // реализуйте этот метод, чтобы он возвращал массив резервуаров, согласно приложенным таблицам
@@ -101,6 +121,25 @@ namespace asp_net_console
         public static int GetTotalVolume(Tank[] units)
         {
             return units.Sum(u => u.Volume);
+        }
+        public static string? SearchTank(string request)
+        {
+            if (GetTanks().Where(t => t.Name!.Contains(request)).Count() == 0) {  return "По запросу ничего не найденно"; }
+            return GetTanks().Where(t => t.Name!.Contains(request)).First().Name;
+        }
+
+        public static void CreateJson(Object obj)
+        {
+            var optionsRU = new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+                WriteIndented = true
+            };
+            string path = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+
+            string fileName = $"{obj.GetType()}.json";
+            string jsonString = JsonSerializer.Serialize(obj, optionsRU);
+            File.WriteAllText(path + $"/Data/{fileName}", jsonString);
         }
     }
 
