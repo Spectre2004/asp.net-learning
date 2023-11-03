@@ -30,6 +30,7 @@ namespace Lesson1ConsoleApp
             }
         }
 
+
         public static IList<Deal> DealJsonParser(string jsonPath)
         {
             //чтение из json файла (десериализация)
@@ -42,6 +43,11 @@ namespace Lesson1ConsoleApp
             return array;
         }
 
+
+        //Реализовать метод GetNumbersOfDeals, который принимает коллекцию объектов класса Deal и:
+        //фильтрует по сумме(не меньше 100 рублей)
+        //среди отфильтрованных, берёт 5 сделок с самой ранней датой
+        //возвращает номера(поле Id) в отсортированном по сумме по убыванию виде
         public static IList<string> GetNumbersOfDeals(IEnumerable<Deal> deals)
         {
             IList<string> result = new List<string>();
@@ -65,14 +71,10 @@ namespace Lesson1ConsoleApp
 
         public static IList<SumByMonth> GetSumsByMonth(IEnumerable<Deal> deals)
         {
-            //создаем лист SumByMonth из 
-            // данных из deals и потом группируем по месяцу
             var result = deals.Select(d => new SumByMonth(new DateTime(d.Date.Year, d.Date.Month, 1), d.Sum))
                               .GroupBy(r => r.Month)
                               .Select(r => new SumByMonth(r.Key, r.Sum(r => r.Sum))).OrderBy(r => r.Month).ToList();
 
-            //создаем лист SumByMonth только теперь по каждому месяцу сумма r.Key = месяц из группировки, r.Sum(r => r.Sum) суммируем Sum из коллекции 
-            // IGrouping
             return result;
         }
     }
