@@ -1,18 +1,20 @@
 ﻿using Lesson1ConsoleApp.Model;
 using System.Collections.Immutable;
+using System.Reflection;
 using System.Text.Json;
 
 namespace Lesson1ConsoleApp
 {
     internal class Program
     {
-        public static readonly string path = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+        public static readonly string basePath = Assembly.GetExecutingAssembly().Location;
+        public static readonly string rootPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\.."));
         static void Main(string[] args)
         {
             //Консольное приложение в функции Main должно вызывать методы GetNumbersOfDeals и GetSumsByMonth и выводить в консоль результаты
             //(количество найденных значений, сами идентификаторы через запятую, пары месяц-сумма).
 
-            IList<Deal> deal = DealJsonParser(path + "/Data/JSON_sample_1.json");
+            IList<Deal> deal = DealJsonParser(rootPath + "/Data/JSON_sample_1.json");
 
             Console.WriteLine($"Значений найденно - {deal.Count}");
             Console.WriteLine();

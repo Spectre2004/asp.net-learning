@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Encodings.Web;
 using System.Text;
 using System.Text.Unicode;
+using System.Reflection;
 
 namespace asp_net_console
 {
@@ -10,8 +11,10 @@ namespace asp_net_console
     {
         static void Main(string[] args)
         {
-            
-            string path = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+
+            string basePath = Assembly.GetExecutingAssembly().Location;
+            string rootPath = Path.GetFullPath(Path.Combine(basePath, @"..\..\..\.."));
+
             var tanks = GetTanks();
             var units = GetUnits();
             var factories = GetFactories();
@@ -36,7 +39,7 @@ namespace asp_net_console
             CreateJson(factories);
 
             //чтение из json файла (десериализация)
-            string jsonStr = File.ReadAllText(path + "/Data/asp_net_console.Tank[].json");
+            string jsonStr = File.ReadAllText(rootPath + "/Data/asp_net_console.Tank[].json");
             Tank[]? tanks1 = JsonSerializer.Deserialize<Tank[]>(jsonStr);
 
             Console.WriteLine("------------------------------------------------------------------------------------------------");
@@ -50,6 +53,8 @@ namespace asp_net_console
                 Console.WriteLine(SearchTank(request!));
 
             } while (request != "");
+
+            Console.ReadKey();
         }
 
         // реализуйте этот метод, чтобы он возвращал массив резервуаров, согласно приложенным таблицам
